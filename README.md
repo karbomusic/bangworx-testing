@@ -49,10 +49,10 @@ Set NUM_ROWS=1 for LED Strips.
 
   envName decides which display is used. esp32dev = chia display, heltec_wifi_kit_32 = heltec built-in.
              Examples:
-                pio run -t upload, monitor -e heltec_wifi_kit_32
-                pio run -t upload, monitor -e esp32dev
-                pio run -t upload -e heltec_wifi_kit_32 --upload-port COM6
-                pio run -t upload -e esp32dev
-                pio run -t upload -e esp32dev --upload-port COM6
+                pio run -t upload, monitor -e heltec_wifi_kit_32  
+                pio run -t upload, monitor -e esp32dev  
+                pio run -t upload -e heltec_wifi_kit_32 --upload-port COM6  
+                pio run -t upload -e esp32dev  
+                pio run -t upload -e esp32dev --upload-port COM6  
 
-             List targets: pio run --list-targets
+             List targets: pio run --list-targets  

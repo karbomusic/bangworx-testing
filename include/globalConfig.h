@@ -27,18 +27,18 @@ const int TEMP_SCL_PIN = 22; // display and temperature sensors.
 const int TEMP_SDA_PIN = 21; // display and temperature sensors.
 const int NUM_ROWS = 1;
 const int NUM_COLS = 0;
-const int MAX_CURRENT = 2000; // mA
+const int MAX_CURRENT = 500; // mA
 const int NUM_VOLTS = 5;
 
 // was in kanimations.h
-#define NUM_LEDS 105
+#define NUM_LEDS 13
 
 // was in secrets.h
-String hostName = "ledman-studio-counch";    // hostname as seen on network and home page
-String friendlyName = "Studio Counch";       // friendly name for home page
-String softwareVersion = "2.26.24";         // used for about page
-String deviceFamily = "ESP32-ELOTA-Matrix"; // used for about page
-String description = "LEDs baby!";          // used for about page
+String hostName = "bangworx-server";           // hostname as seen on network and home page
+String friendlyName = "BangWorx Server";       // friendly name for home page
+String softwareVersion = "8.7.22";             // used for about page
+String deviceFamily = "ESP32-ELOTA-Fireworks"; // used for about page
+String description = "Go bang!";               // used for about page
 String globalIP = "";
 
 /*-------------------------------------------------------------------
@@ -47,5 +47,5 @@ String globalIP = "";
 #define ARRAY_LENGTH(array) (sizeof((array)) / sizeof((array)[0]))
 String g_temperature = "";
 String g_pageTitle = hostName + " | " + description; // home page title
-String g_friendlyName = friendlyName + " Lights";
+String g_friendlyName = friendlyName + " ¤";
 bool g_isAccessPoint = true;

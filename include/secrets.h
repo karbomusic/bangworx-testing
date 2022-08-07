@@ -1,5 +1,5 @@
 /*+===================================================================
-  File:      secrets.h
+  File:      secrets dot h
 
   Summary:   Wifi SSID and Credentials.
 
@@ -15,5 +15,5 @@
 
 String ssid = STASSID;                         // WiFi ssid
 String password = STAPSK;                      // WiFi password
-String softap_ssid = "LEDMAN-MSFT";          // WiFi softap ssid
-String softap_password = "creekvalley124";      // WiFi softap password
+String softap_ssid = "BANGWORKS-SVR";          // WiFi softap ssid
+String softap_password = "password";           // WiFi softap password

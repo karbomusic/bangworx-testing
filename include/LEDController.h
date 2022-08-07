@@ -1,5 +1,5 @@
 /*+===================================================================
-  File:      Kanimations.h
+  File:      LEDController.h
 
   Summary:   Simple FastLED pixel animation testing.
 
@@ -14,7 +14,6 @@
 #define FRAMES_PER_SECOND 100
 #define COOLING 70 // default: 55
 #define SPARKING 120
-
 
 // Structure for remebering a pixel's color.
 struct sLED
@@ -36,7 +35,6 @@ enum Mode
 // globals
 CRGB leds[NUM_LEDS];
 int gLeds[NUM_LEDS];
-int g_animationValue = -1;               // to inform loop which request was made (needs event).
 uint8_t g_briteValue = 255;              // used to inform loop of new brightness value.
 CHSV g_chsvColor(0, 0, 0);               // used to inform loop of new solid color.
 
@@ -64,6 +62,7 @@ void clearLeds()
 /*--------------------------------------------------------------------
                          FASTLED ANIMATIONS
 ---------------------------------------------------------------------*/
+
 void randomDots2(CRGB leds[])
 {
     currentLEDNum = random(NUM_LEDS - 1);
@@ -101,15 +100,6 @@ void randomDots(CRGB leds[])
             leds[i] = CHSV(random(128, 255), 255, random(0, 70));
         }
         FastLED.show();
-        // reset?
-        // EVERY_N_MILLIS_I(duration, 500)
-        //  {
-        // This initally defaults to 20 seconds, but then will change the run
-        // period to a new random number of seconds from 10 and 30 seconds.
-        // You can name "timingObj" whatever you want.
-        // duration.setPeriod(random16(5, 10));
-        //  leds_done = 0;
-        //  }
 
         if (leds_done < NUM_LEDS)
         {
@@ -150,18 +140,6 @@ void randomNoise(CRGB leds[])
     return;
 }
 
-void randomPurpleJumper(CRGB leds[])
-{
-    for (int i = 0; i < NUM_LEDS; i++)
-    {
-        leds[i] = CHSV(random(127, 250), random(140, 255), random(1, 130));
-    }
-    leds[random(NUM_LEDS)] = CRGB(255, 255, 255);
-    FastLED.show();
-    FastLED.clear();
-    return;
-}
-
 void randomBlueJumper(CRGB leds[])
 {
     for (int i = 0; i < NUM_LEDS; i++)
@@ -174,55 +152,8 @@ void randomBlueJumper(CRGB leds[])
     return;
 }
 
-void redOcean(CRGB leds[])
-{
-    for (int i = 0; i < NUM_LEDS; i++)
-    {
-        leds[i] = CHSV(random(232, 255), random(160, 255), random(1, 130));
-    }
-    leds[random(NUM_LEDS)] = CRGB(255, 255, 255);
-    FastLED.show();
-    FastLED.clear();
-    return;
-}
 
-/*--------------------------------------------------------------------
-   Moving Noise
----------------------------------------------------------------------*/
 
-uint16_t xscale = 30;
-uint16_t yscale = 30;
-uint8_t maxChanges = 24;
-static int16_t dist = random16(12345);
-
-void inchWorm(CRGB leds[])
-{
-    static CRGBPalette16 cPalette = LavaColors_p;
-    static CRGBPalette16 tPalette = OceanColors_p;
-
-    EVERY_N_MILLISECONDS(10)
-    {
-        nblendPaletteTowardPalette(cPalette, tPalette, maxChanges); // AWESOME palette blending capability.
-        inoise8_mover();                                            // Update the LED array with noise at the new location
-        fadeToBlackBy(leds, NUM_LEDS, 4);
-    }
-
-    EVERY_N_SECONDS(5)
-    { // Change the target palette to a random one every 5 seconds.
-        tPalette = CRGBPalette16(CHSV(random8(), 255, random8(128, 255)), CHSV(random8(), 255, random8(128, 255)), CHSV(random8(), 192, random8(128, 255)), CHSV(random8(), 255, random8(128, 255)));
-    }
-
-    EVERY_N_SECONDS(random(10, 35))
-    {
-        for (int i = 0; i < random(10, 30); i++)
-        {
-            leds[random(NUM_LEDS)] = CHSV(0, 0, 255);
-            FastLED.delay(50);
-        }
-    }
-
-    FastLED.show();
-}
 
 /*--------------------------------------------------------------------
    Color Strobe
@@ -305,6 +236,7 @@ void starTwinkle(CRGB leds[])
 /*--------------------------------------------------------------------
    BeatWaver
 ---------------------------------------------------------------------*/
+
 void beatWaver(CRGB leds[])
 {
     currentBlending = LINEARBLEND;
@@ -482,7 +414,6 @@ int *getLtrTransform(int leds[], int rows, int cols)
 
 void beatwave()
 {
-
     uint8_t wave1 = beatsin8(9, 0, 255); // That's the same as beatsin8(9);
     uint8_t wave2 = beatsin8(8, 0, 255);
     uint8_t wave3 = beatsin8(7, 0, 255);
@@ -493,6 +424,11 @@ void beatwave()
         leds[i] = ColorFromPalette(currentPalette, i + wave1 + wave2 + wave3 + wave4, 255, currentBlending);
     }
 }
+
+uint16_t xscale = 30;
+uint16_t yscale = 30;
+uint8_t maxChanges = 24;
+static int16_t dist = random16(12345);
 
 void inoise8_mover()
 {

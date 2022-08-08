@@ -27,7 +27,7 @@ const int TEMP_SCL_PIN = 22; // display and temperature sensors.
 const int TEMP_SDA_PIN = 21; // display and temperature sensors.
 const int NUM_ROWS = 1;
 const int NUM_COLS = 0;
-const int MAX_CURRENT = 500; // mA
+const int MAX_CURRENT = 2000; // mA
 const int NUM_VOLTS = 5;
 
 // was in kanimations.h

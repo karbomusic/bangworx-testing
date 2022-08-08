@@ -62,6 +62,10 @@ void clearLeds()
 /*--------------------------------------------------------------------
                          FASTLED ANIMATIONS
 ---------------------------------------------------------------------*/
+void fireLED(CRGB leds[], int ledNum){
+    leds[ledNum] = CRGB::CornflowerBlue;
+    FastLED.show();
+}
 
 void randomDots2(CRGB leds[])
 {

@@ -54,8 +54,8 @@
   Building:  pio run -t <target> -e envName
 
              Examples:
-                pio run -t upload, monitor -e heltec_wifi_kit_32
-                pio run -t upload, monitor -e fm-dev-kit
+                pio run -t upload -t monitor -e heltec_wifi_kit_32
+                pio run -t upload -t monitor -e fm-dev-kit
                 pio run -t upload -e heltec_wifi_kit_32 --upload-port COM6
                 pio run -t upload -e fm-dev-kit
                 pio run -t upload -e fm-dev-kit --upload-port COM6
@@ -113,7 +113,7 @@ void checkBriteKnob();
 float celsiusToFahrenheit(float c);
 
 // Locals
-const int activityLED = 12;
+const int activityLED = 25;
 unsigned long lastUpdate = 0;
 
 float EMA_a = 0.8; // Smoothing
@@ -129,10 +129,10 @@ void setup()
     Serial.println();
     Serial.println("Booting...");
 
-#if defined(heltec_wifi_kit_32)
     /*--------------------------------------------------------------------
-     Heltec OLED display initialization.
+     Choose display based on the built type.
     ---------------------------------------------------------------------*/
+#if defined(heltec_wifi_kit_32)
     g_OLED.begin();
     g_OLED.clear();
     g_OLED.setFont(u8g2_font_profont15_tf);
@@ -146,7 +146,7 @@ void setup()
 #endif
 
     /*--------------------------------------------------------------------
-    Update oled every second
+    Update heltec oled every second
     ---------------------------------------------------------------------*/
 #if defined(heltec_wifi_kit_32)
         g_OLED.clearBuffer();
@@ -175,11 +175,11 @@ void setup()
     startWifi();
     printDisplayMessage("Server...");
     startWebServer();
+    startWebSocketServer();
 
     /*--------------------------------------------------------------------
      Project specific setup code
     ---------------------------------------------------------------------*/
-
     FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds, NUM_LEDS);
     FastLED.setMaxPowerInVoltsAndMilliamps(NUM_VOLTS, MAX_CURRENT);
     FastLED.setBrightness(180);
@@ -191,7 +191,6 @@ void setup()
 
     // pot smoothing
     EMA_S = analogRead(BRITE_KNOB_PIN);
-
 }
 
 void printDisplayMessage(String msg)
@@ -223,12 +222,26 @@ void printDefaultStatusMessage()
             g_OLED.setCursor(0, g_lineHeight * 3);
             g_OLED.printf("SSID: %s", ssid.c_str());
             g_OLED.setCursor(0, g_lineHeight * 4);
-            g_OLED.printf("Connected: %s", String(isWiFiConnected()).c_str());
+            g_OLED.printf("Connected = %s", String(isWiFiConnected()).c_str());
             g_OLED.sendBuffer();
             lastUpdate = millis();
         }
+    #else
+        // untested in this bworx project
+        display.clearDisplay();
+        display.setTextSize(2);
+        display.setTextColor(WHITE);
+        display.setCursor(0, 0);
+        display.println(globalIP.c_str());
+        display.setCursor(2, 0);
+        display.println(hostName.c_str());
+        display.setCursor(4, 0);
+        display.print("Connected = ");
+        display.println(String(isWiFiConnected()));
+        display.display();
     #endif
 }
+
 void loop()
 {
     printDefaultStatusMessage();
@@ -236,6 +249,17 @@ void loop()
     /*--------------------------------------------------------------------
      Project specific loop code
      ---------------------------------------------------------------------*/
+
+    // Tests that we can send data without a request from the client.
+    // For example, tell the client to ignite morter/can #1,3,2,4,5,8,16,22,13...
+    // Aslo turns on the corresponding LED on the strip.
+    EVERY_N_MILLISECONDS(5000)
+    {
+      int ledToFire = random(13);
+      notifyClients("Push Notice: Fire: Can #" + String(ledToFire));
+      //fireLED(leds, ledToFire);
+      randomDots2(leds);
+    }
 
     delay(100); //  inhale
 }

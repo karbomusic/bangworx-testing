@@ -4,8 +4,11 @@
   Summary:   Provides an Async HTTP server and HTTPUploader for OTA
              updates, manual only via Elegant OTA:
              https://github.com/ayushsharma82/ElegantOTA
-
-  Kary Wall 2/20/22.
+             
+             Now includes websocket support.
+             https://randomnerdtutorials.com/esp32-websocket-server-arduino/
+             
+  Kary Wall 8/7/22.
 ===================================================================+*/
 
 #include <AsyncTCP.h>
@@ -33,29 +36,81 @@ String getControlPanelHTML();
 // locals
 String controlPanelHtml;
 AsyncWebServer server(80);
+AsyncWebSocket ws("/ws");
 
 // globals
 
-// incoming parameters
+// incoming http request parameters, not ws
 const char *MY_PARAM = "myParam";
 
-// Replaces placeholder with section in your web page
-String processor(const String &var)
-{
-    // not working becasue not sure how it works yet
-    if (var == "[TITLE]")
-    {
-        return hostName;
-    }
-    return String();
+//-------------------------------------------------------------------
+//                          Web Sockets Setup
+//-------------------------------------------------------------------
+void notifyClients(String msg) {
+  ws.textAll(msg);
 }
+
+void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
+  AwsFrameInfo *info = (AwsFrameInfo*)arg;
+  if (info->final && info->index == 0 && info->len == len && info->opcode == WS_TEXT) {
+    data[len] = 0;
+    if (strcmp((char*)data, "test") == 0) { // our test message
+      notifyClients("Hello from server!");
+    }
+  }
+}
+
+void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type,
+             void *arg, uint8_t *data, size_t len) {
+  switch (type) {
+    case WS_EVT_CONNECT:
+      Serial.printf("WebSocket client #%u connected from %s\n", client->id(), client->remoteIP().toString().c_str());
+      break;
+    case WS_EVT_DISCONNECT:
+      Serial.printf("WebSocket client #%u disconnected\n", client->id());
+      break;
+    case WS_EVT_DATA:
+      handleWebSocketMessage(arg, data, len);
+      break;
+    case WS_EVT_PONG:
+          Serial.printf("WebSocket pinged.");
+      break;
+    case WS_EVT_ERROR:
+    Serial.printf("WebSocket error - see asyncWebServer.h @line 76: %s\n", (char*)arg);
+      break;
+  }
+}
+
+void startWebSocketServer() {
+    ws.onEvent(onEvent);
+    server.addHandler(&ws);
+    Serial.println("Websocket server started! Open your browser and go to http://" + globalIP);
+    Serial.println("or http://" + hostName);
+}
+
+// for replacing vars in html, not used in this example.
+String processor(const String& var){
+  Serial.println(var);
+  if(var == "STATE"){
+    if ("somevariable"){
+      return "ON";
+    }
+    else{
+      return "OFF";
+    }
+  }
+  return String();
+}
+
+//---------------------------- End Web Sockets Setup ---------------------------------------
 
 void startWebServer()
 {
     //----------------------------------------------------------------------------------------------------------------------
-    // HTTP Requests and Responses
+    // Handle HTTP Requests and Responses
     //----------------------------------------------------------------------------------------------------------------------
 
+    // Keep these default handlers, add new as needed.
     Serial.println("mDNS responder started");
 
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)

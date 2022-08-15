@@ -1,4 +1,7 @@
 /*+===================================================================
+  
+  --- Some of the hardware et al info below is from the LED lighting project and should be ignored ---
+  
   Template: ESP32 Project template with builtin OTA,
             HTTP Server, WiFi connectivity and About page.
             Only manual OTA updates (/update) are supported.

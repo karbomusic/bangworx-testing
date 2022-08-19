@@ -104,7 +104,6 @@ extern int g_lineHeight;
 
 // Project specific externs and globals
 
-
 // Prototypes
 String checkSPIFFS();
 void printDisplayMessage(String msg);
@@ -118,7 +117,6 @@ unsigned long lastUpdate = 0;
 
 float EMA_a = 0.8; // Smoothing
 int EMA_S = 0;     // Smoothing
-
 
 void setup()
 {
@@ -149,17 +147,17 @@ void setup()
     Update heltec oled every second
     ---------------------------------------------------------------------*/
 #if defined(heltec_wifi_kit_32)
-        g_OLED.clearBuffer();
-        g_OLED.setCursor(0, g_lineHeight);
-        g_OLED.printf("IP: %s", globalIP.c_str());
-        g_OLED.setCursor(0, g_lineHeight * 2);
-        g_OLED.printf("%s", hostName.c_str());
-        g_OLED.setCursor(0, g_lineHeight * 3);
-        g_OLED.printf("SSID: %s", ssid.c_str());
-        g_OLED.setCursor(0, g_lineHeight * 4);
-        g_OLED.printf("Connected: %s", String(isWiFiConnected()).c_str());
-        g_OLED.sendBuffer();
-        lastUpdate = millis();
+    g_OLED.clearBuffer();
+    g_OLED.setCursor(0, g_lineHeight);
+    g_OLED.printf("IP: %s", globalIP.c_str());
+    g_OLED.setCursor(0, g_lineHeight * 2);
+    g_OLED.printf("%s", hostName.c_str());
+    g_OLED.setCursor(0, g_lineHeight * 3);
+    g_OLED.printf("SSID: %s", ssid.c_str());
+    g_OLED.setCursor(0, g_lineHeight * 4);
+    g_OLED.printf("Connected: %s", String(isWiFiConnected()).c_str());
+    g_OLED.sendBuffer();
+    lastUpdate = millis();
 #else
     printDisplayMessage("Boot...");
 #endif
@@ -195,51 +193,82 @@ void setup()
 
 void printDisplayMessage(String msg)
 {
-    #if defined(heltec_wifi_kit_32)
-        g_OLED.clearBuffer();
-        g_OLED.setCursor(0, g_lineHeight);
-        g_OLED.printf(msg.c_str());
-        g_OLED.sendBuffer();
-    #else
-        display.clearDisplay();
-        display.setTextSize(2);
-        display.setTextColor(WHITE);
-        display.setCursor(0, 0);
-        display.println(msg);
-        display.display();
-    #endif
+#if defined(heltec_wifi_kit_32)
+    g_OLED.clearBuffer();
+    g_OLED.setCursor(0, g_lineHeight);
+    g_OLED.printf(msg.c_str());
+    g_OLED.sendBuffer();
+#else
+    display.clearDisplay();
+    display.setTextSize(2);
+    display.setTextColor(WHITE);
+    display.setCursor(0, 0);
+    display.println(msg);
+    display.display();
+#endif
 }
 
 void printDefaultStatusMessage()
 {
-    #if defined(heltec_wifi_kit_32)
-        if (millis() - lastUpdate > 1000){
-            g_OLED.clearBuffer();
-            g_OLED.setCursor(0, g_lineHeight);
-            g_OLED.printf("IP: %s", globalIP.c_str());
-            g_OLED.setCursor(0, g_lineHeight * 2);
-            g_OLED.printf("%s", hostName.c_str());
-            g_OLED.setCursor(0, g_lineHeight * 3);
-            g_OLED.printf("SSID: %s", ssid.c_str());
-            g_OLED.setCursor(0, g_lineHeight * 4);
-            g_OLED.printf("Connected = %s", String(isWiFiConnected()).c_str());
-            g_OLED.sendBuffer();
-            lastUpdate = millis();
-        }
-    #else
-        // untested in this bworx project
-        display.clearDisplay();
-        display.setTextSize(2);
-        display.setTextColor(WHITE);
-        display.setCursor(0, 0);
-        display.println(globalIP.c_str());
-        display.setCursor(2, 0);
-        display.println(hostName.c_str());
-        display.setCursor(4, 0);
-        display.print("Connected = ");
-        display.println(String(isWiFiConnected()));
-        display.display();
-    #endif
+    // Decdie what to disply on the connectivity status line on the display.
+    // If we are the master, show number of clients connected.
+    // If we are a clieint, show whether we are connected or not (1/0).
+    // simplify, this is dumb and messy
+    String connected;
+    if (isWiFiConnected() && !g_isAccessPoint)
+    {
+        connected = "Connected = 1";                                // Client connected to master 
+    }
+    else if (isWiFiConnected() && g_isAccessPoint)
+    {
+        connected = "WTF!";                                         // should not be connected to wifi AND be the access point 
+    }
+    else if (getConnectedClientCount() > 0 && g_isAccessPoint)
+    {
+        connected = "Clients " + String(getConnectedClientCount()); // Master with clients connected
+    }
+    else if (getConnectedClientCount() == 0 && g_isAccessPoint)    
+    {
+        connected = "Clients 0";                                    // Master with no clients connected
+    }
+    else if (!g_isAccessPoint && !isWiFiConnected())
+    {
+        connected = "No WiFi";                                      // Client not connected to wifi
+    }
+    else  
+    {
+        connected = "Why me here?";                                
+    }
+
+#if defined(heltec_wifi_kit_32)
+    if (millis() - lastUpdate > 1000)
+    {
+        g_OLED.clearBuffer();
+        g_OLED.setCursor(0, g_lineHeight);
+        g_OLED.printf("IP: %s", globalIP.c_str());
+        g_OLED.setCursor(0, g_lineHeight * 2);
+        g_OLED.printf("%s", hostName.c_str());
+        g_OLED.setCursor(0, g_lineHeight * 3);
+        g_OLED.printf("SSID: %s", ssid.c_str());
+        g_OLED.setCursor(0, g_lineHeight * 4);
+        g_OLED.printf(connected.c_str());
+        g_OLED.sendBuffer();
+        lastUpdate = millis();
+    }
+#else
+    // untested in this bworx project
+    display.clearDisplay();
+    display.setTextSize(2);
+    display.setTextColor(WHITE);
+    display.setCursor(0, 0);
+    display.println(globalIP.c_str());
+    display.setCursor(2, 0);
+    display.println(hostName.c_str());
+    display.setCursor(4, 0);
+    display.print("Connected = ");
+    display.println(connected.c_str());
+    display.display();
+#endif
 }
 
 void loop()
@@ -250,15 +279,13 @@ void loop()
      Project specific loop code
      ---------------------------------------------------------------------*/
 
-    // Tests that we can send data without a request from the client.
-    // For example, tell the client to ignite morter/can #1,3,2,4,5,8,16,22,13...
-    // Aslo turns on the corresponding LED on the strip.
-    EVERY_N_MILLISECONDS(5000)
+    // Tests that we can push data without a request from the client.
+    // For example, tell the client to ignite morter/cans in order for now.
+    // Also turns on the corresponding LED on the strip.
+    EVERY_N_MILLISECONDS(3000)
     {
-      int ledToFire = random(13);
-      notifyClients("Push Notice: Fire: Can #" + String(ledToFire));
-      //fireLED(leds, ledToFire);
-      randomDots2(leds);
+        notifyClients("Push Notice: Fire: Shell #" + String(firedLEDCount + 1)); // do this another way instead of sucking firedLEDCount of a header
+        fireLED(leds);
     }
 
     delay(100); //  inhale

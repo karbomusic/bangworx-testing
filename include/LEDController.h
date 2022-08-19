@@ -35,8 +35,8 @@ enum Mode
 // globals
 CRGB leds[NUM_LEDS];
 int gLeds[NUM_LEDS];
-uint8_t g_briteValue = 255;              // used to inform loop of new brightness value.
-CHSV g_chsvColor(0, 0, 0);               // used to inform loop of new solid color.
+uint8_t g_briteValue = 255; // used to inform loop of new brightness value.
+CHSV g_chsvColor(0, 0, 0);  // used to inform loop of new solid color.
 
 // prototypes
 int *getLtrTransform(int leds[], int rows, int cols);
@@ -62,9 +62,24 @@ void clearLeds()
 /*--------------------------------------------------------------------
                          FASTLED ANIMATIONS
 ---------------------------------------------------------------------*/
-void fireLED(CRGB leds[], int ledNum){
-    leds[ledNum] = CRGB::CornflowerBlue;
-    FastLED.show();
+
+// Testfires LEDs in order
+int firedLEDCount = 0;
+void fireLED(CRGB leds[])
+{
+    if (firedLEDCount < NUM_LEDS)
+    {
+        firedLEDCount++;
+        leds[firedLEDCount] = CRGB(240, 0, 0);
+        FastLED.show();
+        fadeToBlackBy(leds, NUM_LEDS, 50);
+        Serial.println("Firing LED: " + String(firedLEDCount));
+    }
+    else
+    {
+        FastLED.clear();
+        firedLEDCount = 0;
+    }
 }
 
 void randomDots2(CRGB leds[])
@@ -155,9 +170,6 @@ void randomBlueJumper(CRGB leds[])
     FastLED.clear();
     return;
 }
-
-
-
 
 /*--------------------------------------------------------------------
    Color Strobe

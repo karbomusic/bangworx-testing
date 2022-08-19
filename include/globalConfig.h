@@ -31,12 +31,12 @@ const int MAX_CURRENT = 2000; // mA
 const int NUM_VOLTS = 5;
 
 // was in kanimations.h
-#define NUM_LEDS 13
+#define NUM_LEDS 25
 
 // was in secrets.h
 String hostName = "bangworx-server";           // hostname as seen on network and home page
 String friendlyName = "BangWorx Server";       // friendly name for home page
-String softwareVersion = "8.7.22";             // used for about page
+String softwareVersion = "8.18.22";             // used for about page
 String deviceFamily = "ESP32-ELOTA-Fireworks"; // used for about page
 String description = "Go bang!";               // used for about page
 String globalIP = "";
@@ -49,3 +49,4 @@ String g_temperature = "";
 String g_pageTitle = hostName + " | " + description; // home page title
 String g_friendlyName = friendlyName + " ¤";
 bool g_isAccessPoint = true;
+int g_total_clients = 0;
